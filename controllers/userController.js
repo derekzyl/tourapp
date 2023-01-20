@@ -1,11 +1,20 @@
 /** @format */
 
-exports.getUsers = (req, res) => {
-  res.status(500).json({
+const User = require('../model/userModel');
+
+const catchAsync = require('../utils/catchAsync');
+
+exports.getUsers = catchAsync(async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(200).json({
     status: 'success',
-    message: 'route making in progress',
+    data: {
+      users,
+    },
   });
-};
+});
+
 exports.createUsers = (req, res) => {
   res.status(500).json({
     status: 'success',

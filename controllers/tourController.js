@@ -1,8 +1,10 @@
 /** @format */
 
 const Tour = require('../model/tourModel');
-const APIFeatures = require('./../utils/api_features');
+const APIFeatures = require('../utils/api_features');
 
+const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
 // const tours = fs.readFileSync(
 //   `${__dirname}/../dev-data/data/tours-simple.json`
 // );
@@ -39,25 +41,17 @@ exports.aliasTopTours = (req, res, next) => {
   next();
 };
 
-exports.createTour = async (req, res) => {
-  try {
-    const tour = await Tour.create(req.body);
+exports.createTour = catchAsync(async (req, res, next) => {
+  const tour = await Tour.create(req.body);
 
-    console.log(tour);
-    res.status(200).json({
-      status: 'success',
-      data: {
-        tour: tour,
-      },
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'failed',
-      error: err,
-      message: 'invalid data set',
-    });
-  }
-};
+  console.log(tour);
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour: tour,
+    },
+  });
+});
 
 exports.GetAll = async (req, res) => {
   try {
@@ -97,10 +91,14 @@ exports.GetAll = async (req, res) => {
  * @param {* req.params && req.body },
  * @param {* res}
  */
-exports.GetSome = async (req, res) => {
+exports.GetSome = async (req, res, next) => {
   try {
     const { id } = req.params;
     const singleTour = await Tour.findById(id);
+
+    if (!singleTour) {
+      return next(new AppError('no tour found  with that id', 404));
+    }
 
     res.status(200).json({
       status: 'success',

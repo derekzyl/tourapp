@@ -1,12 +1,12 @@
 /** @format */
 
 const express = require('express');
-const fs = require('fs');
-const bodyParser = require('body-parser');
+
+const cors = require('cors');
 const morgan = require('morgan');
 const AppError = require('./utils/appError');
 
-globalErrorHandler = require('./controllers/errorControllers');
+// globalErrorHandler = require('./controllers/errorControllers');
 const tourRouter = require('./routes/tourRoute');
 const userRouter = require('./routes/userRoute');
 
@@ -19,12 +19,27 @@ if (process.env.NODE_ENV === 'development') {
 //middlewares
 app.use(express.json());
 app.use(express.static(`${__dirname}/public`));
+app.use(cors({ origin: '*' }));
 
 // app.use((req, res, next) => {
 //   console.log('hello middle finger');
 //   next();
 // });
-
+app.use('/', (req, res) => {
+  try {
+    if (!req.headers.auth) {
+      throw new Error('e don set');
+    }
+    // console.log(req.headers);
+    // res.json({
+    //   hey: 'ive snet data',
+    // });
+  } catch (e) {
+    res.status(400).json({
+      dat: e,
+    });
+  }
+});
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
@@ -39,5 +54,5 @@ app.all('*', (req, res, next) => {
   next(err);
 });
 
-app.use(globalErrorHandler);
+// app.use(globalErrorHandler);
 module.exports = app;
